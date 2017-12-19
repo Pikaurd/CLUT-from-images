@@ -49,6 +49,24 @@ def generate_color_matrix_from_image(img, dest=None):
     return lut
 
 
+def fill_color_matrix(lut, img, dest=None):
+    lut = lut.copy()
+    img_list = img.tolist() if dest is None else dest.tolist()
+    for iy in range(img.shape[1]):
+        for ix in range(img.shape[0]):
+            r, g, b = img_list[ix][iy]
+            x, y, bx, by = color_coordinate(r, g, b)
+            lut_y = y + by * 64
+            lut_x = x + bx * 64
+            lut[lut_y][lut_x][0] = r
+            lut[lut_y][lut_x][1] = g
+            lut[lut_y][lut_x][2] = b
+            # print('{r} {g} {b} {x} {y} {bx} {by} {lut_x} {lut_y}'.format(r=r, g=g, b=b, x=x, y=y, bx=bx, by=by, lut_x=lut_x, lut_y=lut_y))
+    return lut
+
+
+
+
 @lru_cache(maxsize=512)
 def color_coordinate(r, g, b) -> Tuple[int, int, int, int]:
     x, y, bx, by = 0, 0, 0, 0
@@ -83,9 +101,13 @@ if __name__ == '__main__':
 
     current_file_path = os.path.abspath(inspect.getfile(inspect.currentframe()))
     dir_name = os.path.dirname(current_file_path)
-    asset_dir = os.path.join(dir_name, 'asset')
+    asset_dir = os.path.join(dir_name, 'assets')
 
     identity_lut = generate_identify_color_matrix()
-    show(identity_lut)
+    # source_path = os.path.join(asset_dir, 'identity.png')
+    filterd_path = os.path.join(asset_dir, 'YV2.JPG')
+    filterd_im = imageio.imread(filterd_path)
+    result_im = generate_color_matrix_from_image(identity_lut, filterd_im)
+    show(result_im)
 
     print(asset_dir)
